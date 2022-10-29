@@ -49,10 +49,6 @@ def test():
     test_acc = 0.0
     for i, (images, labels) in enumerate(test_loader):
 
-        if cuda_avail:
-            images = Variable(images.cuda())
-            labels = Variable(labels.cuda())
-
         # Predict classes using images from the test set
         outputs = model(images)
         _, prediction = torch.max(outputs.data, 1)
@@ -74,14 +70,9 @@ def train(num_epochs):
         train_acc = 0.0
         train_loss = 0.0
         for i, (images, labels) in enumerate(train_loader):
-            # Move images and labels to gpu if available
-            if cuda_avail:
-                images = Variable(images.cuda())
-                labels = Variable(labels.cuda())
-
             # Clear all accumulated gradients
             optimizer.zero_grad()
-            # Predict classes using images from the test set
+            # Predict classes using images from the train set
             outputs = model(images)
             # Compute the loss based on the predictions and actual labels
             loss = loss_fn(outputs, labels)
@@ -138,14 +129,9 @@ test_set = ImageClassifierDataset(images, classes)
 #Create a loder for the test set, note that both shuffle is set to false for the test loader
 test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=4)
 
-#Check if gpu support is available
-cuda_avail = torch.cuda.is_available()
-
 #Create model, optimizer and loss function
 model = SimpleNet(num_classes=4)
 
-if cuda_avail:
-    model.cuda()
 
 optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 loss_fn = nn.CrossEntropyLoss()
