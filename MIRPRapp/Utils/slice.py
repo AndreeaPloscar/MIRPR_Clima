@@ -13,5 +13,3 @@ for filename in os.listdir(directory):
             i += 1
         except:
             print("error")
-
-
