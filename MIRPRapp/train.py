@@ -1,12 +1,11 @@
+import copy
 import os
 from sklearn.metrics import confusion_matrix
 import numpy as np
 import torch
 import torch.nn as nn
-from torchmetrics import ConfusionMatrix, Accuracy
 from torch.utils.data import DataLoader
 from torch.optim import Adam
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -48,28 +47,29 @@ def getNumberOfPhotos(training):
 
 
 accuracies_by_classes = []
-
-confmat = confusion_matrix([], [])
+classes_names = ['none', 'cold', 'warm', 'mixed']
+confmat = confusion_matrix([], [], labels=classes_names)
+best_confmat = confusion_matrix([], [], labels=classes_names)
 
 
 def test():
     global confmat
     model.eval()
     test_acc = 0.0
+    labels_for_matrix = []
+    predictions = []
     for i, (images, labels) in enumerate(test_loader):
         # Predict classes using images from the test set
         outputs = model(images)
         _, prediction = torch.max(outputs.data, 1)
         # prediction = prediction.cpu().numpy()
-        accuracy = Accuracy(num_classes=4)
-        accuracy(prediction, labels.data)
-        accuracies_by_classes.append(accuracy)
-
-        confmat = confusion_matrix(labels.data, prediction)
-
+        labels_for_matrix.extend(labels.data)
+        predictions.extend(prediction)
         test_acc += torch.sum(torch.eq(prediction, labels.data))
 
-    # Compute the average acc and loss over all 9 test images
+    confmat = confusion_matrix(labels_for_matrix, predictions)
+    accuracies_by_classes.append(confmat.diagonal() / confmat.sum(axis=1))
+    # Compute the average acc and loss over all test images
     test_acc = test_acc / getNumberOfPhotos(False)
     return test_acc
 
@@ -79,6 +79,7 @@ losses = []
 
 
 def train(num_epochs):
+    global best_confmat
     best_acc = 0.0
 
     for epoch in range(num_epochs):
@@ -121,6 +122,7 @@ def train(num_epochs):
         if test_acc > best_acc:
             save_models(epoch)
             best_acc = test_acc
+            best_confmat = copy.deepcopy(confmat)
 
         # Print the metrics
         print("Epoch {}, Train Accuracy: {} , TrainLoss: {} , Test Accuracy: {}".format(epoch, train_acc, train_loss,
@@ -153,17 +155,23 @@ model = SimpleNet(num_classes=4)
 
 optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 loss_fn = nn.CrossEntropyLoss()
-classes_names = ['none', 'cold', 'warm', 'mixed']
 
 if __name__ == "__main__":
-    train(100)
+    train(50)
     plt.plot(test_accuracies, color='blue')
-    plt.plot(test_accuracies, color='red')
     plt.show()
     # print_confusion_matrix(confmat, ['none', 'cold', 'warm', 'mixed'])
-    df_cm = pd.DataFrame(confmat / np.sum(confmat) * 4, index=[i for i in classes_names],
-                         columns=[i for i in classes_names])
+    # df_cm = pd.DataFrame(, index=[i for i in classes_names],
+    #                      columns=[i for i in classes_names])
+
+    plt.plot([acc[0] for acc in accuracies_by_classes], color='orange', label='none')  # none
+    plt.plot([acc[1] for acc in accuracies_by_classes], color='blue', label='cold')  # cold
+    plt.plot([acc[2] for acc in accuracies_by_classes], color='red', label='warm')  # warm
+    plt.plot([acc[3] for acc in accuracies_by_classes], color='green', label='mixed')  # mixed
+    plt.legend(loc="upper left")
+    plt.show()
+
     plt.figure(figsize=(12, 7))
-    sns.heatmap(df_cm, annot=True)
+    sns.heatmap(best_confmat/np.sum(best_confmat) * 4, annot=True, fmt='.2%', yticklabels=classes_names,
+                xticklabels=classes_names)
     plt.savefig('output.png')
-    print(accuracies_by_classes)

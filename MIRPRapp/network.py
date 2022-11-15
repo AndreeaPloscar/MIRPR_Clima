@@ -49,28 +49,30 @@ class SimpleNet(nn.Module):
 
         self.unit12 = Unit(in_channels=256, out_channels=512, kernel_size=3)
         self.unit13 = Unit(in_channels=512, out_channels=512, kernel_size=3)
-        self.unit14 = Unit(in_channels=512, out_channels=512, kernel_size=3)
+        # self.unit14 = Unit(in_channels=512, out_channels=512, kernel_size=3)
 
         # self.upsample1 = nn.Upsample(scale_factor=2)
         # self.unit15 = Unit(in_channels=512, out_channels=512, kernel_size=3)
 
-        self.unit16 = Unit(in_channels=512, out_channels=256, kernel_size=3)
-        self.unit17 = Unit(in_channels=256, out_channels=256, kernel_size=3)
-        self.unit18 = Unit(in_channels=256, out_channels=256, kernel_size=3)
-
+        self.unit14 = Unit(in_channels=512, out_channels=256, kernel_size=3)
+        # self.unit17 = Unit(in_channels=256, out_channels=512, kernel_size=3)
+        self.unit15 = Unit(in_channels=256, out_channels=128, kernel_size=3)
+        self.unit16 = Unit(in_channels=128, out_channels=128, kernel_size=3)
         # self.upsample2 = nn.UpsamplingNearest2d(scale_factor=2)
         # self.unit19 = Unit(in_channels=256, out_channels=256, kernel_size=3)
 
-        self.unit20 = Unit(in_channels=256, out_channels=128, kernel_size=3)
-        self.unit21 = Unit(in_channels=128, out_channels=128, kernel_size=3)
-        self.unit22 = Unit(in_channels=128, out_channels=128, kernel_size=3)
+        # self.unit20 = Unit(in_channels=512, out_channels=128, kernel_size=3)
+        self.unit17 = Unit(in_channels=128, out_channels=64, kernel_size=3)
+        # self.unit22 = Unit(in_channels=128, out_channels=128, kernel_size=3)
 
         # self.upsample3 = nn.UpsamplingNearest2d(scale_factor=2)
         # self.unit23 = Unit(in_channels=128, out_channels=128, kernel_size=3)
 
-        self.unit24 = Unit(in_channels=128, out_channels=64, kernel_size=3)
-        self.unit25 = Unit(in_channels=64, out_channels=64, kernel_size=3)
-        self.unit26 = Unit(in_channels=64, out_channels=32, kernel_size=3)
+        # self.unit24 = Unit(in_channels=128, out_channels=64, kernel_size=3)
+        # self.unit25 = Unit(in_channels=64, out_channels=64, kernel_size=3)
+        self.unit18 = Unit(in_channels=64, out_channels=64, kernel_size=3)
+        self.unit19 = Unit(in_channels=64, out_channels=32, kernel_size=3)
+        self.unit20 = Unit(in_channels=32, out_channels=32, kernel_size=3)
 
         # Add all the units into the Sequential layer in exact order
         self.net = nn.Sequential(self.unit1, self.unit2,  self.unit3, self.unit4, self.unit5,
@@ -79,15 +81,17 @@ class SimpleNet(nn.Module):
                                  self.pool3, self.unit12, self.unit13, self.unit14,
                                  # self.upsample1,
                                  # self.unit15,
-                                 self.unit16, self.unit17, self.unit18,
+                                 self.unit15, self.unit16, self.unit17,
                                  # self.upsample2,
-                                 # self.unit19,
+                                 self.unit18,
+                                 self.unit19,
                                  self.unit20,
-                                 self.unit21, self.unit22,
+                                 # self.unit21, self.unit22,
                                  # self.upsample3,
                                  # self.unit23,
-                                 self.unit24,
-                                 self.unit25, self.unit26)
+                                 # self.unit24,
+                                 # self.unit25, self.unit26
+                                 )
 
         self.fc = nn.Linear(in_features=512, out_features=num_classes)
 
