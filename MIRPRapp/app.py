@@ -2,7 +2,7 @@ import tkinter as tk
 import os
 import torch
 from PIL import ImageTk
-from tkinter import filedialog
+from tkinter import filedialog, CENTER
 from torchvision import transforms
 from PIL import Image
 from torch.autograd import Variable
@@ -28,17 +28,19 @@ def cnn(image):
 
 
 def upload_file():
-    global filepath, panel, name
+    global filepath, panel, name,width,h
     f_types = [('Png Files', '*.png')]
     file = filedialog.askopenfile(filetypes=f_types)
     filepath = os.path.abspath(file.name)
     name = file.name
     img = Image.open(file.name)
-    width, height = img.size
-    width_new = int(width * 2)
-    height_new = int(height * 2)
-    img_resized = img.resize((width_new, height_new))
+    widthh, height = img.size
+    width = int(widthh * 0.8)
+    h = int(height * 0.8)
+    img_resized = img.resize((width, h))
     img = ImageTk.PhotoImage(img_resized)
+    w.config(width=width, height=h)
+    root.geometry("900x900")
     w.create_image(0, 0, image=img, anchor="nw")
     w.img = img
     w.pack()
@@ -57,15 +59,18 @@ def printErrorMessage():
     message.config(text=error)
 
 def cropPicture(x,y):
-    border = 100
-    if border < x < (1000 - border) and border < y < (1000 - border):
-        img = Image.open(name)
-        formattedImage = img.crop((x - border, y - border, x + border, y + border))
-        img = ImageTk.PhotoImage(img)
-        w.create_image(0, 0, image=img, anchor="nw")
-        w.img = img
+    border = 125
+    if border <= x <= (width - border) and border <= y <= (h - border):
+        unformatted = Image.open(name)
+        img_resized = unformatted.resize((width, h))
+        formattedImageCropped = img_resized.crop((x - border, y - border, x + border, y + border))
+        imgageCroppedTk = ImageTk.PhotoImage(formattedImageCropped)
+        w.config(width=250, height=250)
+        root.geometry("600x500")
+        w.create_image(0, 0, image=imgageCroppedTk, anchor="nw")
+        w.img = imgageCroppedTk
         w.pack()
-        printCNNMessage(formattedImage)
+        printCNNMessage(formattedImageCropped)
     else:
         printErrorMessage()
 
@@ -73,15 +78,18 @@ def callback(e):
     x = e.x
     y = e.y
     cropPicture(x, y)
-
+    print(x, y)
+width=0
+h = 0
 root = tk.Tk()
 w = tk.Canvas(root, width=1000, height=1000)
+w.place(relx=0.5, rely=0.5, anchor=CENTER)
 name = ""
 w.bind('<Button-1>', callback)
 img = Image
 filepath = ""
-model_name = "./cnn49.model"
-root.geometry("600x400")
+model_name = "./cnn23.model"
+root.geometry("900x1200")
 root.title('Synoptic Maps')
 desc = tk.Label(root, text="", width=60)
 text = "Please choose a point to be the center of the area you want to analyse"

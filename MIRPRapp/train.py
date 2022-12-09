@@ -4,6 +4,8 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.optim.lr_scheduler
+from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 import seaborn as sns
@@ -11,28 +13,40 @@ import matplotlib.pyplot as plt
 
 from dataset import ImageClassifierDataset
 from load_images import load_images
-from network import SimpleNet
+from network2 import SimpleNet
 
-
-def adjust_learning_rate(epoch):
-    lr = 0.001
-    if epoch > 180:
-        lr = lr / 1000000
-    elif epoch > 150:
-        lr = lr / 100000
-    elif epoch > 120:
-        lr = lr / 10000
-    elif epoch > 90:
-        lr = lr / 1000
-    elif epoch > 60:
-        lr = lr / 100
-    elif epoch > 30:
-        lr = lr / 10
-    for param_group in optimizer.param_groups:
-        param_group["lr"] = lr
+#
+# def adjust_learning_rate(epoch):
+#     lr = 0.001
+#     if epoch > 180:
+#         lr = lr / 1000000
+#     elif epoch > 150:
+#         lr = lr / 100000
+#     elif epoch > 120:
+#         lr = lr / 10000
+#     elif epoch > 90:
+#         lr = lr / 1000
+#     elif epoch > 60:
+#         lr = lr / 100
+#     elif epoch > 30:
+#         lr = lr / 10
+#     for param_group in optimizer.param_groups:
+#         param_group["lr"] = lr
 
 
 def save_models(epoch):
+    plt.plot(test_accuracies, color='blue')
+    plt.show()
+    plt.plot([acc[0] for acc in accuracies_by_classes], color='orange', label='none')  # none
+    plt.plot([acc[1] for acc in accuracies_by_classes], color='blue', label='cold')  # cold
+    plt.plot([acc[2] for acc in accuracies_by_classes], color='red', label='warm')  # warm
+    plt.plot([acc[3] for acc in accuracies_by_classes], color='green', label='mixed')  # mixed
+    plt.legend(loc="upper left")
+    plt.show()
+    plt.figure(figsize=(12, 7))
+    sns.heatmap(best_confmat / np.sum(best_confmat) * 4, annot=True, fmt='.2%', yticklabels=classes_names,
+                xticklabels=classes_names)
+    plt.savefig('output.png')
     torch.save(model.state_dict(), "cnn{}.model".format(epoch))
     print("Improved model saved")
 
@@ -106,7 +120,8 @@ def train(num_epochs):
             train_acc += torch.sum(prediction == labels.data)
 
         # Call the learning rate adjustment function
-        adjust_learning_rate(epoch)
+        scheduler.step()
+        # adjust_learning_rate(epoch)
 
         # Compute the average acc and loss over all 50000 training images
         number = getNumberOfPhotos(True)
@@ -152,12 +167,13 @@ test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=True, num_work
 
 # Create model, optimizer and loss function
 model = SimpleNet(num_classes=4)
-
 optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
+scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
+
 loss_fn = nn.CrossEntropyLoss()
 
 if __name__ == "__main__":
-    train(50)
+    train(100)
     plt.plot(test_accuracies, color='blue')
     plt.show()
     # print_confusion_matrix(confmat, ['none', 'cold', 'warm', 'mixed'])
