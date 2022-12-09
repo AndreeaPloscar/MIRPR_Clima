@@ -30,19 +30,19 @@ class SimpleNet(nn.Module):
         # self.unit5 = Unit(in_channels=64, out_channels=64, kernel_size=3)
 
         self.dropout2 = nn.Dropout2d()
-        self.pool1 = nn.MaxPool2d(kernel_size=4, stride=1, padding=1, dilation=1)
+        self.pool1 = nn.MaxPool2d(kernel_size=4, stride=1, padding=2, dilation=1)
 
         self.unit6 = Unit(in_channels=64, out_channels=128, kernel_size=3)
         # self.unit7 = Unit(in_channels=128, out_channels=128, kernel_size=3)
 
         self.dropout3 = nn.Dropout2d()
-        self.pool2 = nn.MaxPool2d(kernel_size=4, stride=1, padding=1, dilation=1)
+        self.pool2 = nn.MaxPool2d(kernel_size=4, stride=1, padding=2, dilation=1)
 
         self.unit9 = Unit(in_channels=128, out_channels=256, kernel_size=3)
         self.unit10 = Unit(in_channels=256, out_channels=256, kernel_size=3)
 
         # self.dropout4 = nn.Dropout2d()
-        self.pool3 = nn.MaxPool2d(kernel_size=4, stride=1, padding=1, dilation=1)
+        self.pool3 = nn.MaxPool2d(kernel_size=4, stride=1, padding=2, dilation=1)
 
         self.unit15 = Unit(in_channels=256, out_channels=128, kernel_size=3)
 
