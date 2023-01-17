@@ -6,7 +6,7 @@ from tkinter import filedialog, CENTER
 from torchvision import transforms
 from PIL import Image
 from torch.autograd import Variable
-from network import SimpleNet
+from network2 import SimpleNet
 
 
 def cnn(image):
@@ -59,13 +59,13 @@ def printErrorMessage():
     message.config(text=error)
 
 def cropPicture(x,y):
-    border = 125
+    border = 100
     if border <= x <= (width - border) and border <= y <= (h - border):
         unformatted = Image.open(name)
         img_resized = unformatted.resize((width, h))
         formattedImageCropped = img_resized.crop((x - border, y - border, x + border, y + border))
         imgageCroppedTk = ImageTk.PhotoImage(formattedImageCropped)
-        w.config(width=250, height=250)
+        w.config(width=200, height=200)
         root.geometry("600x500")
         w.create_image(0, 0, image=imgageCroppedTk, anchor="nw")
         w.img = imgageCroppedTk
@@ -88,13 +88,13 @@ name = ""
 w.bind('<Button-1>', callback)
 img = Image
 filepath = ""
-model_name = "./cnn23.model"
+model_name = "improved16/cnn86.model"
 root.geometry("900x1200")
 root.title('Synoptic Maps')
 desc = tk.Label(root, text="", width=60)
 text = "Please choose a point to be the center of the area you want to analyse"
 desc.text = text
-desc.config(text = text)
+desc.config(text=text)
 desc.pack()
 l1 = tk.Label(root, text='Upload synpotic map')
 
